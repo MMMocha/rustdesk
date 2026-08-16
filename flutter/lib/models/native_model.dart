@@ -227,6 +227,7 @@ class PlatformFFI {
       if (desktopType == DesktopType.cm) {
         await _ffiBind.cmInit();
       }
+      name = ".";
       await _ffiBind.mainDeviceId(id: id);
       await _ffiBind.mainDeviceName(name: name);
       await _ffiBind.mainSetHomeDir(home: _homeDir);
