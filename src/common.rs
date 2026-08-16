@@ -896,7 +896,7 @@ pub fn get_sysinfo() -> serde_json::Value {
     {
         let username = crate::platform::get_active_username();
         if !username.is_empty() && (!cfg!(windows) || username != "SYSTEM") {
-            out["username"] = json!(username);
+            out["username"] = json!("-");
         }
     }
     out
