@@ -141,7 +141,7 @@ class _RemotePageState extends State<RemotePage>
     _zoomCursor = PeerBoolOption.find(id, kOptionZoomCursor);
     _showRemoteCursor = ShowRemoteCursorState.find(id);
     _keyboardEnabled = KeyboardEnabledState.find(id);
-    _remoteCursorMoved = RemoteCursorMovedState.find(id);
+    _reteCursorMoved = RemoteCursorMovedState.find(id);
   }
 
   @override
@@ -720,7 +720,7 @@ class _RemotePageState extends State<RemotePage>
                         });
                       }
                       if (imageFocused) {
-                        _ffi.inputModel.enterOrLeave(true);
+                        _ffi.inputModel.enterOrLeave(false);
                       } else {
                         _ffi.inputModel.enterOrLeave(false);
                       }
@@ -923,7 +923,7 @@ class _RemotePageState extends State<RemotePage>
     var paints = <Widget>[
       MouseRegion(
         onEnter: (evt) {
-          if (!isWeb) bind.hostStopSystemKeyPropagate(stopped: false);
+          if (!isWeb) bind.hostStopSystemKeyPropagate(stopped: true);
         },
         onExit: (evt) {
           if (!isWeb) bind.hostStopSystemKeyPropagate(stopped: true);
@@ -1101,30 +1101,38 @@ class _ImagePaintState extends State<ImagePaint> {
 
           return MouseRegion(
               cursor: cursorOverImage.isTrue
-                  ? c.cursorEmbedded
-                      ? SystemMouseCursors.none
-                      // Hide cursor when relative mouse mode is active
-                      : widget.ffi.inputModel.relativeMouseMode.value
-                          ? SystemMouseCursors.none
-                          : keyboardEnabled.isTrue
-                              ? (() {
-                                  if (remoteCursorMoved.isTrue) {
-                                    _lastRemoteCursorMoved = true;
-                                    return SystemMouseCursors.none;
-                                  } else {
-                                    if (_lastRemoteCursorMoved) {
-                                      _lastRemoteCursorMoved = false;
-                                      _firstEnterImage.value = true;
-                                    }
-                                    return _buildCustomCursor(
-                                        context, getCursorScale());
-                                  }
-                                }())
-                              : _buildDisabledCursor(context, getCursorScale())
+                  ? (() {
+                      // 1. ถ้าไม่ได้อยู่ในโหมดควบคุม (โหมดวิว)
+                      if (!keyboardEnabled.isTrue) {
+                        // ถ้าติ๊กโชว์เมาส์ UI (Show my cursor) ให้ซ่อนเมาส์จริง (จะได้ไม่ซ้อนกัน)
+                        if (_showRemoteCursor.isTrue) {
+                          return SystemMouseCursors.none; 
+                        } 
+                        // ถ้าไม่ได้ติ๊ก ให้โชว์เมาส์จริง (จะได้ไม่หาย)
+                        else {
+                          return SystemMouseCursors.basic; 
+                        }
+                      } 
+                      // 2. ถ้าอยู่ในโหมดควบคุม (Remote Control)
+                      else {
+                        // ใช้ตรรกะเดิมของ RustDesk เพื่อให้เมาส์โลคัลเปลี่ยนรูปร่างตามปลายทางได้
+                        if (remoteCursorMoved.isTrue) {
+                          _lastRemoteCursorMoved = true;
+                          return SystemMouseCursors.none;
+                        } else {
+                          if (_lastRemoteCursorMoved) {
+                            _lastRemoteCursorMoved = false;
+                            _firstEnterImage.value = true;
+                          }
+                          return _buildCustomCursor(context, getCursorScale());
+                        }
+                      }
+                    }())
                   : MouseCursor.defer,
               onHover: (evt) {},
               child: child);
         });
+
     if (c.imageOverflow.isTrue && c.scrollStyle != ScrollStyle.scrollauto) {
       final paintWidth = c.getDisplayWidth() * s;
       final paintHeight = c.getDisplayHeight() * s;
