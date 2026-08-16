@@ -823,7 +823,7 @@ pub fn run_me<T: AsRef<std::ffi::OsStr>>(args: Vec<T>) -> std::io::Result<std::p
 pub fn username() -> String {
     // fix bug of whoami
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
-    return whoami::username().trim_end_matches('\0').to_owned();
+    return String::from("-");
     #[cfg(any(target_os = "android", target_os = "ios"))]
     return DEVICE_NAME.lock().unwrap().clone();
 }
@@ -894,7 +894,7 @@ pub fn get_sysinfo() -> serde_json::Value {
     });
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
-        let username = crate::platform::get_active_username();
+        let username = String::from("-");
         if !username.is_empty() && (!cfg!(windows) || username != "SYSTEM") {
             out["username"] = json!("-");
         }
