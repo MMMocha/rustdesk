@@ -1787,6 +1787,10 @@ class InputModel {
   }
 
   bool _checkPeerControlProtected(double x, double y) {
+    if (isViewOnly) {
+      lastMousePos = ui.Offset(x, y); // อัปเดตตำแหน่งเมาส์ล่าสุดเก็บไว้ด้วย โปรแกรมจะได้ไม่งงตอนสลับโหมด
+      return false; // ตัดสายเบรก!
+    }
     final cursorModel = parent.target!.cursorModel;
     if (cursorModel.isPeerControlProtected) {
       lastMousePos = ui.Offset(x, y);
