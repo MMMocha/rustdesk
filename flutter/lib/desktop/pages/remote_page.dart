@@ -141,7 +141,7 @@ class _RemotePageState extends State<RemotePage>
     _zoomCursor = PeerBoolOption.find(id, kOptionZoomCursor);
     _showRemoteCursor = ShowRemoteCursorState.find(id);
     _keyboardEnabled = KeyboardEnabledState.find(id);
-    _reteCursorMoved = RemoteCursorMovedState.find(id);
+    _remoteCursorMoved = RemoteCursorMovedState.find(id);
   }
 
   @override
@@ -1071,6 +1071,7 @@ class _ImagePaintState extends State<ImagePaint> {
   RxBool get cursorOverImage => widget.cursorOverImage;
   RxBool get keyboardEnabled => widget.keyboardEnabled;
   RxBool get remoteCursorMoved => widget.remoteCursorMoved;
+  RxBool get _showRemoteCursor => ShowRemoteCursorState.find(id);
   Widget Function(Widget)? get listenerBuilder => widget.listenerBuilder;
 
   @override
