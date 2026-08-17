@@ -1072,6 +1072,8 @@ class _ImagePaintState extends State<ImagePaint> {
   RxBool get keyboardEnabled => widget.keyboardEnabled;
   RxBool get remoteCursorMoved => widget.remoteCursorMoved;
   RxBool get _showRemoteCursor => ShowRemoteCursorState.find(id);
+  FFI get _ffi => widget.ffi;
+  RxBool get _zoomCursor => widget.zoomCursor;
   Widget Function(Widget)? get listenerBuilder => widget.listenerBuilder;
 
   @override
