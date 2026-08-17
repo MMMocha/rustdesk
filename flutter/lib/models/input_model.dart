@@ -736,11 +736,11 @@ class InputModel {
   }
 
   KeyEventResult handleRawKeyEvent(RawKeyEvent e) {
-    if (isViewOnly) return KeyEventResult.handled;
-    if (isViewCamera) return KeyEventResult.handled;
+    if (isViewOnly) return KeyEventResult.ignored;
+    if (isViewCamera) return KeyEventResult.ignored;
     if (!isInputSourceFlutter) {
       if (isDesktop) {
-        return KeyEventResult.handled;
+        return KeyEventResult.ignored;
       } else if (isWeb) {
         return KeyEventResult.ignored;
       }
@@ -817,15 +817,15 @@ class InputModel {
       legacyKeyboardModeRaw(e);
     }
 
-    return KeyEventResult.handled;
+    return KeyEventResult.ignored;
   }
 
   KeyEventResult handleKeyEvent(KeyEvent e) {
-    if (isViewOnly) return KeyEventResult.handled;
-    if (isViewCamera) return KeyEventResult.handled;
+    if (isViewOnly) return KeyEventResult.ignored;
+    if (isViewCamera) return KeyEventResult.ignored;
     if (!isInputSourceFlutter) {
       if (isDesktop) {
-        return KeyEventResult.handled;
+        return KeyEventResult.ignored;
       } else if (isWeb) {
         return KeyEventResult.ignored;
       }
@@ -921,7 +921,7 @@ class InputModel {
       legacyKeyboardMode(e);
     }
 
-    return KeyEventResult.handled;
+    return KeyEventResult.ignored;
   }
 
   /// Send Key Event
