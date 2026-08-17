@@ -720,7 +720,7 @@ class _RemotePageState extends State<RemotePage>
                         });
                       }
                       if (imageFocused) {
-                        _ffi.inputModel.enterOrLeave(false);
+                        _ffi.inputModel.enterOrLeave(true);
                       } else {
                         _ffi.inputModel.enterOrLeave(false);
                       }
@@ -923,7 +923,7 @@ class _RemotePageState extends State<RemotePage>
     var paints = <Widget>[
       MouseRegion(
         onEnter: (evt) {
-          if (!isWeb) bind.hostStopSystemKeyPropagate(stopped: true);
+          if (!isWeb) bind.hostStopSystemKeyPropagate(stopped: false);
         },
         onExit: (evt) {
           if (!isWeb) bind.hostStopSystemKeyPropagate(stopped: true);
@@ -1101,35 +1101,8 @@ class _ImagePaintState extends State<ImagePaint> {
           }
 
           return MouseRegion(
-              cursor: cursorOverImage.isTrue
-                  ? (() {
-                      // 1. ถ้าไม่ได้อยู่ในโหมดควบคุม (โหมดวิว)
-                      if (!keyboardEnabled.isTrue) {
-                        // ถ้าติ๊กโชว์เมาส์ UI (Show my cursor) ให้ซ่อนเมาส์จริง (จะได้ไม่ซ้อนกัน)
-                        if (_showRemoteCursor.isTrue) {
-                          return SystemMouseCursors.none; 
-                        } 
-                        // ถ้าไม่ได้ติ๊ก ให้โชว์เมาส์จริง (จะได้ไม่หาย)
-                        else {
-                          return SystemMouseCursors.basic; 
-                        }
-                      } 
-                      // 2. ถ้าอยู่ในโหมดควบคุม (Remote Control)
-                      else {
-                        // ใช้ตรรกะเดิมของ RustDesk เพื่อให้เมาส์โลคัลเปลี่ยนรูปร่างตามปลายทางได้
-                        if (remoteCursorMoved.isTrue) {
-                          _lastRemoteCursorMoved = true;
-                          return SystemMouseCursors.none;
-                        } else {
-                          if (_lastRemoteCursorMoved) {
-                            _lastRemoteCursorMoved = false;
-                            _firstEnterImage.value = true;
-                          }
-                          return _buildCustomCursor(context, getCursorScale());
-                        }
-                      }
-                    }())
-                  : MouseCursor.defer,
+              // ให้เมาส์ของเราเป็นลูกศรปกติเสมอ (แบบ AnyDesk)
+              cursor: cursorOverImage.isTrue ? SystemMouseCursors.basic : MouseCursor.defer,
               onHover: (evt) {},
               child: child);
         });
@@ -1143,21 +1116,36 @@ class _ImagePaintState extends State<ImagePaint> {
               ? _BuildPaintTextureRender(
                   c, s, Offset.zero, paintSize, isViewOriginal())
               : _buildScrollbarNonTextureRender(m, paintSize, s);
-      return NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            c.updateScrollPercent();
-            return false;
-          },
-          child: mouseRegion(
-            child: Obx(() => _buildCrossScrollbarFromLayout(
-                  context,
-                  _buildListener(paintWidget),
-                  c.size,
-                  paintSize,
-                  c.scrollHorizontal,
-                  c.scrollVertical,
-                )),
-          ));
+      
+      var paints = <Widget>[
+        NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              c.updateScrollPercent();
+              return false;
+            },
+            child: mouseRegion(
+              child: Obx(() => _buildCrossScrollbarFromLayout(
+                    context,
+                    _buildListener(paintWidget),
+                    c.size,
+                    paintSize,
+                    c.scrollHorizontal,
+                    c.scrollVertical,
+                  )),
+            ))
+      ];
+
+      if (!_ffi.canvasModel.cursorEmbedded) {
+        paints.add(Obx(() => (_showRemoteCursor.isFalse || keyboardEnabled.isTrue) 
+            ? const Offstage() 
+            : CursorPaint(
+                id: widget.id,
+                zoomCursor: _zoomCursor,
+              )));
+      }
+
+      return Stack(children: paints);
+
     } else {
       if (c.size.width > 0 && c.size.height > 0) {
         final paintWidget =
@@ -1172,7 +1160,20 @@ class _ImagePaintState extends State<ImagePaint> {
                     c.size,
                     isViewOriginal())
                 : _buildScrollAutoNonTextureRender(m, c, s);
-        return mouseRegion(child: _buildListener(paintWidget));
+
+        var paints = <Widget>[mouseRegion(child: _buildListener(paintWidget))];
+
+        if (!_ffi.canvasModel.cursorEmbedded) {
+          paints.add(Obx(() => (_showRemoteCursor.isFalse || keyboardEnabled.isTrue) 
+              ? const Offstage() 
+              : CursorPaint(
+                  id: widget.id,
+                  zoomCursor: _zoomCursor,
+                )));
+        }
+
+        return Stack(children: paints);
+
       } else {
         return Container();
       }
