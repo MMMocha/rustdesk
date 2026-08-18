@@ -738,16 +738,17 @@ class InputModel {
   KeyEventResult handleRawKeyEvent(RawKeyEvent e) {
     if (isViewOnly) return KeyEventResult.ignored;
     if (isViewCamera) return KeyEventResult.ignored;
-    if (!isInputSourceFlutter) {
-      if (isDesktop) {
-        return KeyEventResult.ignored;
-      } else if (isWeb) {
-        return KeyEventResult.ignored;
-      }
-    }
+// ❌ ปิดบล็อกนี้ บังคับให้ Flutter เป็นคนประมวลผลปุ่มเอง
+    // if (!isInputSourceFlutter) {
+    //   if (isDesktop) {
+    //     return KeyEventResult.handled;
+    //   } else if (isWeb) {
+    //     return KeyEventResult.ignored;
+    //   }
+    // }
 
     if (_relativeMouse.handleRawKeyEvent(e)) {
-      return KeyEventResult.handled;
+      return KeyEventResult.ignored;
     }
 
     bool iosCapsLock = false;
@@ -823,18 +824,19 @@ class InputModel {
   KeyEventResult handleKeyEvent(KeyEvent e) {
     if (isViewOnly) return KeyEventResult.ignored;
     if (isViewCamera) return KeyEventResult.ignored;
-    if (!isInputSourceFlutter) {
-      if (isDesktop) {
-        return KeyEventResult.ignored;
-      } else if (isWeb) {
-        return KeyEventResult.ignored;
-      }
-    }
+// ❌ ปิดบล็อกนี้เช่นกัน
+    // if (!isInputSourceFlutter) {
+    //   if (isDesktop) {
+    //     return KeyEventResult.handled;
+    //   } else if (isWeb) {
+    //     return KeyEventResult.ignored;
+    //   }
+    // }
     if (isWindows || isLinux) {
       // Ignore meta keys. Because flutter window will loose focus if meta key is pressed.
       if (e.physicalKey == PhysicalKeyboardKey.metaLeft ||
           e.physicalKey == PhysicalKeyboardKey.metaRight) {
-        return KeyEventResult.handled;
+        return KeyEventResult.ignored;
       }
     }
 
@@ -845,7 +847,7 @@ class InputModel {
       altPressed: alt,
       commandPressed: command,
     )) {
-      return KeyEventResult.handled;
+      return KeyEventResult.ignored;
     }
 
     bool iosCapsLock = false;
@@ -1155,9 +1157,10 @@ class InputModel {
     }
     _relativeMouse.onEnterOrLeaveImage(enter);
     _flingTimer?.cancel();
-    if (!isInputSourceFlutter) {
-      bind.sessionEnterOrLeave(sessionId: sessionId, enter: enter);
-    }
+   // ❌ ปิดการทำงานของ Hook ระดับ OS (ต้นเหตุที่ฮุบปุ่ม F4)
+    // if (!isInputSourceFlutter) {
+    //   bind.sessionEnterOrLeave(sessionId: sessionId, enter: enter);
+    // }
     if (!isWeb && enter) {
       bind.setCurSessionId(sessionId: sessionId);
     }
